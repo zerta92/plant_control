@@ -1,7 +1,7 @@
 #include "CustomUtils.h"
-#include "time.h"
+
 // #include "GlobalVars.h"
-struct tm timeinfo;
+// struct tm timeinfo;
 int getHumidity(int humiditySensor)
 {
     int humidity_raw = analogRead(humiditySensor);

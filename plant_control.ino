@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include "esp_adc_cal.h"
 
+#include "time.h"
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <AsyncTCP.h>
@@ -16,19 +17,12 @@
 #include <DallasTemperature.h>
 
 // Custom Files
-#include <secrets.h> 
-#include "GlobalVars.h"
 // #include "handleOTA.h"
-#include "ServerSetup.h"
+#include "./libraries/plant_control/secrets.h"
+#include "./libraries/plant_control/GlobalVars.h"
+#include "./libraries/plant_control/ServerSetup.h"
 #include "CustomUtils.h"
 
-//Assign init values 
-// int auto_mode = 1;
-// bool is_pulse_water = false;
-// bool temp_nofo_flag = false;
-// bool humidity_nofo_flag = false;
-// int humidity_setpoint_global = 50;
-// int points_read_from_start = 0;
 
 // Telegram Bot
 const char *BOTtoken = SECRET_BOT_TOKEN;
@@ -40,7 +34,6 @@ UniversalTelegramBot bot(BOTtoken, client);
 const char *ssid = SECRET_SSID;
 const char *password = SECRET_SPASSWORD;
 AsyncWebServer server(80);
-
 
 int temp_data[100];
 int humidity_data[100];
@@ -58,7 +51,6 @@ void printDirectory(File dir, int numTabs = 3);
 unsigned long previousMillis = 0;
 unsigned long interval = 60000;
 
-
 int TEMPERATURE_SETPOINT = 21;
 int *data_points_pointer;
 char data_points_placeholder[200] = {'\0'};
@@ -75,7 +67,7 @@ void setup()
   Serial.println("Connecting WIFI...");
   connectWifi();
   Serial.println("starting server...");
-  setupServer(humiditySensor,humidityRelay,tempRelay, points_read_from_start, temperature, humidity_percent,humidity_setpoint_global, auto_mode, temp_nofo_flag,humidity_nofo_flag,is_pulse_water);
+  setupServer(humiditySensor, humidityRelay, tempRelay, points_read_from_start, temperature, humidity_percent, humidity_setpoint_global, auto_mode, temp_nofo_flag, humidity_nofo_flag, is_pulse_water);
   populateDataArrays();
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
   printLocalTime();
@@ -221,16 +213,12 @@ void setupSPIFFS()
   }
 }
 
-
-
-
 void pulseWater()
 {
   digitalWrite(humidityRelay, HIGH);
   delay(1000);
   digitalWrite(humidityRelay, LOW);
 }
-
 
 int addValueToTempData(float number)
 {
@@ -446,6 +434,3 @@ void populateDataArrays()
     humidity_data[i] = 666;
   }
 }
-
-
-
