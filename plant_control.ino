@@ -14,10 +14,11 @@
 #include <ArduinoJson.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <secrets.h> //Secrets file
 
 // Telegram Bot
-#define BOTtoken "5085933205:AAGPxkWO4kgpxgl2B-8zWV2gKyk_7hQebJo"
-#define CHAT_ID "1731352194"
+const char *BOTtoken = SECRET_BOT_TOKEN;
+const char *CHAT_ID = SECRET_CHAT_ID;
 WiFiClientSecure client;
 UniversalTelegramBot bot(BOTtoken, client);
 
@@ -28,8 +29,8 @@ const int daylightOffset_sec = 3600;
 struct tm timeinfo;
 
 // Wifi and Server
-const char *ssid = "SKYSCVTX";
-const char *password = "QB4uJpGUt3gi";
+const char *ssid = SECRET_SSID;
+const char *password = SECRET_SPASSWORD;
 AsyncWebServer server(80);
 
 // Temp and Humidity I/O
