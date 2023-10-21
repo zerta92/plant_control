@@ -15,6 +15,7 @@ bool humidity_nofo_flag = false;
 int humidity_setpoint_global = 50;
 bool is_pulse_water = false;
 int points_read_from_start = 0;
+float humidity_percent_prev = 0.0;
 
 // System Time NTP
 const char *ntpServer = "pool.ntp.org";

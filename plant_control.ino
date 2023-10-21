@@ -1,7 +1,6 @@
 
 #include <Arduino.h>
 #include "esp_adc_cal.h"
-
 #include "time.h"
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
@@ -18,9 +17,9 @@
 
 // Custom Files
 // #include "handleOTA.h"
-#include "./libraries/plant_control/secrets.h"
-#include "./libraries/plant_control/GlobalVars.h"
-#include "./libraries/plant_control/ServerSetup.h"
+#include "secrets.h"
+#include "GlobalVars.h"
+#include "ServerSetup.h"
 #include "CustomUtils.h"
 
 
@@ -126,11 +125,11 @@ void loop(void)
 
 void autoControl(float humidity_percent, float temperature)
 {
-  if (humidity_percent < humidity_setpoint_global)
+  //If humidity is not changing even though we have been watering then dont water any more. reset humidity_percent_prev with onTogglePumpChange()
+  if (humidity_percent < humidity_setpoint_global && (humidity_percent > humidity_percent_prev))
   {
-    digitalWrite(humidityRelay, HIGH);
-    delay(1000);
-    digitalWrite(humidityRelay, LOW);
+    humidity_percent_prev = humidity_percent;
+    pulseWater();
     if (humidity_nofo_flag == false)
     {
 
@@ -216,8 +215,9 @@ void setupSPIFFS()
 void pulseWater()
 {
   digitalWrite(humidityRelay, HIGH);
-  delay(1000);
+  delay(800);
   digitalWrite(humidityRelay, LOW);
+  delay(300);
 }
 
 int addValueToTempData(float number)
