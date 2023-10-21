@@ -7,7 +7,7 @@
 #include <ESPAsyncWebServer.h>
 #include <SPIFFS.h>
 #include <ESPmDNS.h>
-#include <WiFiUdp.h>;
+#include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include <HTTPClient.h>
 #include <UniversalTelegramBot.h>
@@ -32,7 +32,6 @@ const char *ssid = "SKYSCVTX";
 const char *password = "QB4uJpGUt3gi";
 AsyncWebServer server(80);
 
-
 // Temp and Humidity I/O
 int auto_mode = 1;
 const int humiditySensor = 34;
@@ -50,9 +49,9 @@ bool is_pulse_water = false;
 #define ONE_WIRE_BUS 0
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
-unsigned long timerDelay = 1000;  
-unsigned long lastTime = 0;  
-unsigned long lastTimeLogToSpiffs = 0;  
+unsigned long timerDelay = 1000;
+unsigned long lastTime = 0;
+unsigned long lastTimeLogToSpiffs = 0;
 
 void printDirectory(File dir, int numTabs = 3);
 
@@ -130,15 +129,14 @@ void loop(void)
     previousMillis = currentMillis;
   }
 
-
-
-  if ((currentMillis - lastTime) > timerDelay) {
+  if ((currentMillis - lastTime) > timerDelay)
+  {
     lastTime = millis();
 
     temperature = getTemperature();
     humidity_raw = analogRead(humiditySensor);
     humidity_percent = getHumidity(humidity_raw);
-  
+
     if (auto_mode)
     {
       autoControl(humidity_percent, temperature);
@@ -149,21 +147,20 @@ void loop(void)
     };
   }
 
+  if (currentMillis - lastTimeLogToSpiffs >= interval)
+  {
+    lastTimeLogToSpiffs = millis();
+    previousMillis = currentMillis;
+    addValueToHumidityData(humidity_percent);
+    addValueToTempData(temperature);
+  }
 
-    if (currentMillis - lastTimeLogToSpiffs >= interval){
-       lastTimeLogToSpiffs = millis();
-       previousMillis = currentMillis;
-       addValueToHumidityData(humidity_percent);
-       addValueToTempData(temperature);
-    }
-  
-
-//  if (currentMillis - previousMillis >= interval)
-//  {
-//    previousMillis = currentMillis;
-//    addValueToHumidityData(humidity_percent);
-//    addValueToTempData(temperature);
-//  }
+  //  if (currentMillis - previousMillis >= interval)
+  //  {
+  //    previousMillis = currentMillis;
+  //    addValueToHumidityData(humidity_percent);
+  //    addValueToTempData(temperature);
+  //  }
 
   delay(10);
 }
@@ -712,8 +709,6 @@ String getStartTime()
     Serial.println("Failed to get start time, trying again");
     getLocalTime(&timeinfo);
   }
-
-  
 
   int _year_days = timeinfo.tm_yday;
   int _day = timeinfo.tm_mday;
