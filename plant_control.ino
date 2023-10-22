@@ -22,7 +22,6 @@
 #include "ServerSetup.h"
 #include "CustomUtils.h"
 
-int auto_mode = 1;
 // Telegram Bot
 const char *BOTtoken = SECRET_BOT_TOKEN;
 const char *CHAT_ID = SECRET_CHAT_ID;
@@ -107,25 +106,17 @@ void loop(void)
   if (currentMillis - lastTimeLogToSpiffs >= interval)
   {
     lastTimeLogToSpiffs = millis();
-    previousMillis = currentMillis;
-    //this crashes memory corruption
-//    addValueToHumidityData(humidity_percent);
-//    addValueToTempData(temperature);
+    // previousMillis = currentMillis;
+    addValueToHumidityData(humidity_percent);
+    addValueToTempData(temperature);
   }
-
-  //  if (currentMillis - previousMillis >= interval)
-  //  {
-  //    previousMillis = currentMillis;
-  //    addValueToHumidityData(humidity_percent);
-  //    addValueToTempData(temperature);
-  //  }
 
   delay(10);
 }
 
 void autoControl(float humidity_percent, float temperature)
 {
-  //If humidity is not changing even though we have been watering then dont water any more. reset humidity_percent_prev with onTogglePumpChange()
+  // If humidity is not changing even though we have been watering then dont water any more. reset humidity_percent_prev with onTogglePumpChange()
   if (humidity_percent < humidity_setpoint_global && (humidity_percent > humidity_percent_prev))
   {
     humidity_percent_prev = humidity_percent;
@@ -230,16 +221,19 @@ int addValueToTempData(float number)
   points_read_from_start++;
   writeDataToSPIFFS("temp");
   writeDataToSPIFFS("points_count");
+  return number;
 }
 
 int addValueToHumidityData(float number)
 {
+
   for (int i = 99; i >= 1; i--)
   {
     humidity_data[i] = humidity_data[i - 1];
   }
   humidity_data[0] = number;
   writeDataToSPIFFS("humidity");
+  return number;
 }
 
 void setupSavedData(String type)
@@ -312,16 +306,31 @@ void writeDataToSPIFFS(String type)
   {
     data_to_save = humidity_data;
     file = SPIFFS.open("/humidity.txt", "w");
+    if (!file)
+    {
+      Serial.println("Error opening file for writing");
+      return;
+    }
   }
   else if (type == "temp")
   {
     data_to_save = temp_data;
     file = SPIFFS.open("/temp.txt", "w");
+    if (!file)
+    {
+      Serial.println("Error opening file for writing");
+      return;
+    }
   }
   else
   {
     String point_count_string = String(points_read_from_start).c_str();
     file = SPIFFS.open("/point_count.txt", "w");
+    if (!file)
+    {
+      Serial.println("Error opening file for writing");
+      return;
+    }
     int bytesWritten = file.print(point_count_string);
     file.close();
     return;
@@ -334,12 +343,6 @@ void writeDataToSPIFFS(String type)
     int point = data_to_save[x];
     plot_data = String(point) + String("|");
     string_data += plot_data;
-  }
-
-  if (!file)
-  {
-    Serial.println("Error opening file for writing");
-    return;
   }
 
   int bytesWritten = file.print(string_data);
