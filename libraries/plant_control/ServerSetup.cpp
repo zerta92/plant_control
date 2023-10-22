@@ -1,25 +1,26 @@
 #include "ServerSetup.h"
 #include <SPIFFS.h>
 #include "CustomUtils.h"
+// #include "GlobalVars.h"
 
 String webString = "";
 
-void setupServer(int humiditySensor, int humidityRelay, int tempRelay, int points_read_from_start, float temperature, float humidity_percent, int humidity_setpoint_global, int auto_mode, bool temp_nofo_flag, bool humidity_nofo_flag, bool is_pulse_water)
+void setupServer(int humiditySensor, int humidityRelay, int tempRelay, int &points_read_from_start, float &temperature, float &humidity_percent, int &humidity_setpoint_global, int &auto_mode, bool &temp_nofo_flag, bool &humidity_nofo_flag, bool &is_pulse_water)
 {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             {
-              AsyncWebServerResponse *response = request->beginResponse(SPIFFS, "/index.html", "text/html");
-              
-                   File file = SPIFFS.open("/index.html");
-                    if (!file) {
-                      Serial.println("Failed to open index.html");
-                      return;
-                    }
-                   const auto filesize = file.size();
-                   file.close();
-                   response->addHeader("Content-Length", String(filesize, DEC));
-              request->send(response);
-              Serial.println("Sent index.html"); });
+    AsyncWebServerResponse *response = request->beginResponse(SPIFFS, "/index.html", "text/html");
+
+    File file = SPIFFS.open("/index.html");
+    if (!file)
+    {
+      Serial.println("Failed to open index.html");
+      return;
+    }
+    const auto filesize = file.size();
+    file.close();
+    response->addHeader("Content-Length", String(filesize, DEC));
+    request->send(response); });
 
   // To Download a file
   server.on("/a", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -50,17 +51,17 @@ void setupServer(int humiditySensor, int humidityRelay, int tempRelay, int point
   server.on("/temp_points", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(SPIFFS, "/temp.txt"); });
 
-  server.on("/stats", HTTP_GET, [humiditySensor, temperature](AsyncWebServerRequest *request)
+  server.on("/stats", HTTP_GET, [humiditySensor, &temperature](AsyncWebServerRequest *request)
             {
               const float temperature = getTemperature();
               const float humidity = getHumidity(humiditySensor);
               webString = "Temperature: " + String((int)temperature) + " C" + "\n" + "Soil Humidity: " + String((int)humidity) + " %";
               request->send(200, "text/plain", webString); });
 
-  server.on("/get_points_read_from_start", HTTP_GET, [points_read_from_start](AsyncWebServerRequest *request)
+  server.on("/get_points_read_from_start", HTTP_GET, [&points_read_from_start](AsyncWebServerRequest *request)
             { request->send(200, "text/plain", String(points_read_from_start).c_str()); });
 
-  server.on("/temp", HTTP_GET, [temperature](AsyncWebServerRequest *request)
+  server.on("/temp", HTTP_GET, [&temperature](AsyncWebServerRequest *request)
             { request->send(200, "text/plain", String(temperature).c_str()); });
 
   server.on("/get_temp_points", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -69,7 +70,7 @@ void setupServer(int humiditySensor, int humidityRelay, int tempRelay, int point
   server.on("/get_humidity_points", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(SPIFFS, "/humidity.txt", "text/plain"); });
 
-  server.on("/humidity", HTTP_GET, [humidity_percent](AsyncWebServerRequest *request)
+  server.on("/humidity", HTTP_GET, [&humidity_percent](AsyncWebServerRequest *request)
             {
 //              const int humidity_raw = analogRead(humiditySensor);
 //              const float humidity = getHumidity(humidity_raw);
@@ -85,10 +86,10 @@ void setupServer(int humiditySensor, int humidityRelay, int tempRelay, int point
               int light_status = digitalRead(tempRelay);
               request->send(200, "text/plain", String(light_status).c_str()); });
 
-  server.on("/get_auto_status", HTTP_GET, [auto_mode](AsyncWebServerRequest *request)
+  server.on("/get_auto_status", HTTP_GET, [&auto_mode](AsyncWebServerRequest *request)
             { request->send(200, "text/plain", String(auto_mode).c_str()); });
 
-  server.on("/get_nofos_status", HTTP_GET, [temp_nofo_flag, humidity_nofo_flag](AsyncWebServerRequest *request)
+  server.on("/get_nofos_status", HTTP_GET, [&temp_nofo_flag, &humidity_nofo_flag](AsyncWebServerRequest *request)
             {
             StaticJsonDocument<200> doc;
               doc["temp_flag"] = temp_nofo_flag;
@@ -97,7 +98,7 @@ void setupServer(int humiditySensor, int humidityRelay, int tempRelay, int point
               serializeJson(doc, json);
              request->send(200, "text/plain", json); });
 
-  server.on("/toggle_pump", HTTP_GET, [humiditySensor, humidityRelay, humidity_percent, humidity_setpoint_global, &is_pulse_water](AsyncWebServerRequest *request)
+  server.on("/toggle_pump", HTTP_GET, [humiditySensor, humidityRelay, &humidity_percent, &humidity_setpoint_global, &is_pulse_water](AsyncWebServerRequest *request)
             {
 //              https://techtutorialsx.com/2017/12/17/esp32-arduino-http-server-getting-query-parameters/
              AsyncWebParameter* p = request->getParam(0);
@@ -142,7 +143,6 @@ void setupServer(int humiditySensor, int humidityRelay, int tempRelay, int point
   server.on("/toggle_auto", HTTP_GET, [&auto_mode](AsyncWebServerRequest *request)
             {
               auto_mode = !auto_mode;
-              Serial.println(auto_mode)
               request->send(200, "text/plain", String(auto_mode).c_str()); });
 
   server.on("/reset_flags", HTTP_GET, [&temp_nofo_flag, &humidity_nofo_flag](AsyncWebServerRequest *request)
@@ -160,7 +160,7 @@ void setupServer(int humiditySensor, int humidityRelay, int tempRelay, int point
             {
               String start_time = getStartTime();
               request->send(200, "text/plain", String(start_time).c_str()); });
-  server.on("/get_humidity_setpoint", HTTP_GET, [humidity_setpoint_global](AsyncWebServerRequest *request)
+  server.on("/get_humidity_setpoint", HTTP_GET, [&humidity_setpoint_global](AsyncWebServerRequest *request)
             { request->send(200, "text/plain", String(humidity_setpoint_global).c_str()); });
 
   server.on("/set_humidity_setpoint", HTTP_GET, [&humidity_setpoint_global](AsyncWebServerRequest *request)

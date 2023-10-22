@@ -9,7 +9,7 @@ int humidity_raw = 0;
 float humidity_percent = 0.0;
 
 // Control Vars
-int auto_mode = 1;
+// int auto_mode = 1;
 bool temp_nofo_flag = false;
 bool humidity_nofo_flag = false;
 int humidity_setpoint_global = 50;

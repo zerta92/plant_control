@@ -22,7 +22,7 @@
 #include "ServerSetup.h"
 #include "CustomUtils.h"
 
-
+int auto_mode = 1;
 // Telegram Bot
 const char *BOTtoken = SECRET_BOT_TOKEN;
 const char *CHAT_ID = SECRET_CHAT_ID;
@@ -91,7 +91,6 @@ void loop(void)
   if ((currentMillis - lastTime) > timerDelay)
   {
     lastTime = millis();
-
     temperature = getTemperature();
     humidity_percent = getHumidity(humiditySensor);
 
@@ -109,8 +108,9 @@ void loop(void)
   {
     lastTimeLogToSpiffs = millis();
     previousMillis = currentMillis;
-    addValueToHumidityData(humidity_percent);
-    addValueToTempData(temperature);
+    //this crashes memory corruption
+//    addValueToHumidityData(humidity_percent);
+//    addValueToTempData(temperature);
   }
 
   //  if (currentMillis - previousMillis >= interval)
