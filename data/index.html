@@ -246,15 +246,6 @@
         getHumiditySetpoint();
       };
 
-      const handleTime = (data) => {
-        let hrs = data.getHours();
-        let mins = data.getMinutes();
-        if (hrs <= 9) hrs = "0" + hrs;
-        if (mins < 10) mins = "0" + mins;
-        const postTime = hrs + ":" + mins;
-        return postTime;
-      };
-
       function setCookie(name, value, days) {
         var expires = "";
         if (days) {
@@ -526,31 +517,35 @@
         xhttp.send();
       }
 
-      setInterval(function () {
-        getPumpStatus();
-        getLightStatus();
-        getNotificationsStatus();
-      }, 29000);
+      function refresh() {
+        setInterval(function () {
+          getPumpStatus();
+          getLightStatus();
+          getNotificationsStatus();
+        }, 29000);
 
-      setInterval(function () {
-        getTemp();
-      }, 30000);
+        setInterval(function () {
+          getTemp();
+        }, 30000);
 
-      setInterval(function () {
-        getHumidity();
-      }, 31000);
+        setInterval(function () {
+          getHumidity();
+        }, 31000);
 
-      setInterval(function () {
-        getTempPoints();
-      }, 32000);
+        setInterval(function () {
+          getTempPoints();
+        }, 32000);
 
-      setInterval(function () {
-        getHumidityPoints();
-      }, 33000);
+        setInterval(function () {
+          getHumidityPoints();
+        }, 33000);
 
-      setInterval(function () {
-        getHumiditySetpoint();
-      }, 34000);
+        setInterval(function () {
+          getHumiditySetpoint();
+        }, 34000);
+      }
+
+      refresh();
 
       function formatDate(t) {
         var t = new Date();
@@ -642,6 +637,94 @@
         });
       }
 
+      const chartT = new Highcharts.Chart({
+        chart: {
+          renderTo: "chart-temperature",
+        },
+        series: [
+          {
+            name: "Temperature",
+            type: "line",
+            color: "red",
+            marker: {
+              symbol: "circle",
+              radius: 3,
+              fillColor: "#101D42",
+            },
+          },
+          {
+            name: "Humidity",
+            type: "line",
+            color: "blue",
+            marker: {
+              symbol: "triangle-down",
+              radius: 3,
+              fillColor: "#71B48D",
+            },
+          },
+        ],
+        title: {
+          text: undefined,
+        },
+        xAxis: {
+          type: "datetime",
+          dateTimeLabelFormats: { second: "%H:%M:%S" },
+        },
+        yAxis: {
+          title: {
+            text: "Temperature(C) - Humidity(%)",
+          },
+        },
+        credits: {
+          enabled: false,
+        },
+      });
+
+      function plotTemperatureOrHumidity(
+        temp_points_array,
+        type,
+        total_point_count
+      ) {
+        const temp_data = temp_points_array
+          .filter((p) => p !== PLACEHOLDER_POINT)
+          .reverse();
+        const start_time =
+          start_date.getTime() + milliseconds * total_point_count;
+
+        let current_time = 0;
+        for (var i = 0; i < temp_data.length; i++) {
+          const temp = Number(temp_data[i]);
+          if (temp == PLACEHOLDER_POINT) {
+            continue;
+          }
+          current_time = start_time + milliseconds * i;
+          console.log({
+            start_time,
+            start_date,
+            current_time,
+            total_point_count,
+          });
+          const series = type === "temp" ? 0 : 1;
+
+          chartT.series[series].addPoint(
+            [current_time, temp],
+            true,
+            false,
+            true
+          );
+        }
+      }
+
+      /* Deprecated */
+
+      // const handleTime = (data) => {
+      //   let hrs = data.getHours();
+      //   let mins = data.getMinutes();
+      //   if (hrs <= 9) hrs = "0" + hrs;
+      //   if (mins < 10) mins = "0" + mins;
+      //   const postTime = hrs + ":" + mins;
+      //   return postTime;
+      // };
       // function setXAxis(x_scale, type, plotted_points) {
       //   const x_axis = Array.from(Array(x_axis_range + 1).keys());
       //   const x_axis_dates = x_axis.map((x) => {
@@ -770,85 +853,6 @@
 
       //   return out;
       // }
-
-      var chartT = new Highcharts.Chart({
-        chart: {
-          renderTo: "chart-temperature",
-        },
-        series: [
-          {
-            name: "Temperature",
-            type: "line",
-            color: "red",
-            marker: {
-              symbol: "circle",
-              radius: 3,
-              fillColor: "#101D42",
-            },
-          },
-          {
-            name: "Humidity",
-            type: "line",
-            color: "blue",
-            marker: {
-              symbol: "triangle-down",
-              radius: 3,
-              fillColor: "#71B48D",
-            },
-          },
-        ],
-        title: {
-          text: undefined,
-        },
-        xAxis: {
-          type: "datetime",
-          dateTimeLabelFormats: { second: "%H:%M:%S" },
-        },
-        yAxis: {
-          title: {
-            text: "Temperature(C) - Humidity(%)",
-          },
-        },
-        credits: {
-          enabled: false,
-        },
-      });
-
-      function plotTemperatureOrHumidity(
-        temp_points_array,
-        type,
-        total_point_count
-      ) {
-        const temp_data = temp_points_array
-          .filter((p) => p !== PLACEHOLDER_POINT)
-          .reverse();
-        const start_time =
-          start_date.getTime() + milliseconds * total_point_count;
-
-        let current_time = 0;
-        for (var i = 0; i < temp_data.length; i++) {
-          const temp = Number(temp_data[i]);
-          if (temp == PLACEHOLDER_POINT) {
-            continue;
-          }
-          current_time = start_time + milliseconds * i;
-          console.log({
-            start_time,
-            start_date,
-            current_time,
-            total_point_count,
-          });
-          const series = type === "temp" ? 0 : 1;
-
-          chartT.series[series].addPoint(
-            [current_time, temp],
-            true,
-            false,
-            true
-          );
-        }
-      }
-      // testGraph();
     </script>
   </body>
 </html>
