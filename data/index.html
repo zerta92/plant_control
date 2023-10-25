@@ -230,6 +230,8 @@
       const x_axis_interval = 10;
       let read_point_count = 0;
       const PLACEHOLDER_POINT = 666;
+      const minutes = 1; //use how often new points are added in backend
+      const milliseconds = minutes * 60 * 1000;
 
       window.onload = async function () {
         await getStartTime();
@@ -640,134 +642,134 @@
         });
       }
 
-      function setXAxis(x_scale, type, plotted_points) {
-        const x_axis = Array.from(Array(x_axis_range + 1).keys());
-        const x_axis_dates = x_axis.map((x) => {
-          var minutesToAdd = x;
-          var futureDate = new Date(
-            start_date.getTime() + minutesToAdd * 60000
-          );
-          const time = handleTime(futureDate);
-          return time;
-        });
+      // function setXAxis(x_scale, type, plotted_points) {
+      //   const x_axis = Array.from(Array(x_axis_range + 1).keys());
+      //   const x_axis_dates = x_axis.map((x) => {
+      //     var minutesToAdd = x;
+      //     var futureDate = new Date(
+      //       start_date.getTime() + minutesToAdd * 60000
+      //     );
+      //     const time = handleTime(futureDate);
+      //     return time;
+      //   });
 
-        let offset = 0;
-        x_axis_dates.forEach((x, i) => {
-          if (!Number.isInteger(offset / x_axis_interval)) {
-            offset++;
-            return;
-          }
-          const label = `<div >${x}</div>`;
-          if (type == "temp") {
-            document
-              .getElementById("x-axis-temp")
-              .insertAdjacentHTML("beforeend", label);
-          }
-          if (type == "humidity") {
-            document
-              .getElementById("x-axis-humidity")
-              .insertAdjacentHTML("beforeend", label);
-          }
-          offset++;
-        });
+      //   let offset = 0;
+      //   x_axis_dates.forEach((x, i) => {
+      //     if (!Number.isInteger(offset / x_axis_interval)) {
+      //       offset++;
+      //       return;
+      //     }
+      //     const label = `<div >${x}</div>`;
+      //     if (type == "temp") {
+      //       document
+      //         .getElementById("x-axis-temp")
+      //         .insertAdjacentHTML("beforeend", label);
+      //     }
+      //     if (type == "humidity") {
+      //       document
+      //         .getElementById("x-axis-humidity")
+      //         .insertAdjacentHTML("beforeend", label);
+      //     }
+      //     offset++;
+      //   });
 
-        if (type == "temp") {
-          temp_axis_set = true;
-        }
-        if (type == "humidity") {
-          humidity_axis_set = true;
-        }
-      }
+      //   if (type == "temp") {
+      //     temp_axis_set = true;
+      //   }
+      //   if (type == "humidity") {
+      //     humidity_axis_set = true;
+      //   }
+      // }
 
-      /* Unused, Highcharts handles Axis */
-      async function manageAxis(type, point_count) {
-        console.log("at manageAxis");
-        console.log({ point_count });
-        console.log({ x_axis_interval });
-        const points_over = point_count - 100;
-        const point_offset =
-          points_over > 0 ? x_axis_range + points_over : x_axis_range;
+      // /* Unused, Highcharts handles Axis */
+      // async function manageAxis(type, point_count) {
+      //   console.log("at manageAxis");
+      //   console.log({ point_count });
+      //   console.log({ x_axis_interval });
+      //   const points_over = point_count - 100;
+      //   const point_offset =
+      //     points_over > 0 ? x_axis_range + points_over : x_axis_range;
 
-        const whole_range_array = Array.from(Array(point_offset + 1).keys());
-        const x_axis = whole_range_array.slice(
-          whole_range_array.length - x_axis_range - 1,
-          whole_range_array.length
-        );
+      //   const whole_range_array = Array.from(Array(point_offset + 1).keys());
+      //   const x_axis = whole_range_array.slice(
+      //     whole_range_array.length - x_axis_range - 1,
+      //     whole_range_array.length
+      //   );
 
-        if (type == "temp") {
-          document.getElementById("x-axis-temp").innerHTML = "";
-        }
-        if (type == "humidity") {
-          document.getElementById("x-axis-humidity").innerHTML = "";
-        }
-        let offset = 0;
-        x_axis.forEach((x, i) => {
-          if (!Number.isInteger(offset / x_axis_interval)) {
-            offset++;
-            return;
-          }
-          var minutesToAdd = x;
-          var futureDate = new Date(
-            start_date.getTime() + minutesToAdd * 60000
-          );
-          const time = handleTime(futureDate);
-          const label = `<div >${time}</div>`;
-          if (type == "temp") {
-            document
-              .getElementById("x-axis-temp")
-              .insertAdjacentHTML("beforeend", label);
-          }
-          if (type == "humidity") {
-            document
-              .getElementById("x-axis-humidity")
-              .insertAdjacentHTML("beforeend", label);
-          }
-          offset++;
-        });
-      }
+      //   if (type == "temp") {
+      //     document.getElementById("x-axis-temp").innerHTML = "";
+      //   }
+      //   if (type == "humidity") {
+      //     document.getElementById("x-axis-humidity").innerHTML = "";
+      //   }
+      //   let offset = 0;
+      //   x_axis.forEach((x, i) => {
+      //     if (!Number.isInteger(offset / x_axis_interval)) {
+      //       offset++;
+      //       return;
+      //     }
+      //     var minutesToAdd = x;
+      //     var futureDate = new Date(
+      //       start_date.getTime() + minutesToAdd * 60000
+      //     );
+      //     const time = handleTime(futureDate);
+      //     const label = `<div >${time}</div>`;
+      //     if (type == "temp") {
+      //       document
+      //         .getElementById("x-axis-temp")
+      //         .insertAdjacentHTML("beforeend", label);
+      //     }
+      //     if (type == "humidity") {
+      //       document
+      //         .getElementById("x-axis-humidity")
+      //         .insertAdjacentHTML("beforeend", label);
+      //     }
+      //     offset++;
+      //   });
+      // }
 
-      /* replaced with plotTemperatureOrHumidity which uses Highcharts */
-      function drawGraph(temp_points_array, type, total_point_count) {
-        const y_scale = type == "temp" ? 2 : 1;
-        const x_scale = 8.3;
-        const temp_data = temp_points_array.reverse();
-        let out = "";
-        let plot_data = "";
-        out += `<svg viewBox="0 0 800 100" id="${type}" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"${svg_width_px}px\" height=\"120\">\n`;
-        out += `<rect id="${type}-rect" width=\"${svg_width_px}px\" height=\"100\" fill=\"rgb(241, 244, 237)\" axis stroke-width=\"1\" stroke=\"rgb(0, 0, 0)\" />\n`;
-        out += '<g stroke="black">\n';
-        let y_ = temp_data[0];
-        let x_ = 0;
-        let plotted_points = 0;
-        for (let x = 0; x < temp_points_array.length - 1; x++) {
-          let y2 = temp_data[x];
-          if (y2 == PLACEHOLDER_POINT) {
-            continue;
-          }
-          plot_data = `<line x1=${x_ * x_scale} y1=${100 - y_ * y_scale} x2=${
-            plotted_points * x_scale
-          } y2=${100 - y2 * y_scale} stroke-width=\"1\" />\n`;
-          out += plot_data;
-          y_ = y2;
-          x_ = plotted_points;
-          plotted_points++;
-        }
-        out += "</g>\n</svg>\n";
+      // /* replaced with plotTemperatureOrHumidity which uses Highcharts */
+      // function drawGraph(temp_points_array, type, total_point_count) {
+      //   const y_scale = type == "temp" ? 2 : 1;
+      //   const x_scale = 8.3;
+      //   const temp_data = temp_points_array.reverse();
+      //   let out = "";
+      //   let plot_data = "";
+      //   out += `<svg viewBox="0 0 800 100" id="${type}" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"${svg_width_px}px\" height=\"120\">\n`;
+      //   out += `<rect id="${type}-rect" width=\"${svg_width_px}px\" height=\"100\" fill=\"rgb(241, 244, 237)\" axis stroke-width=\"1\" stroke=\"rgb(0, 0, 0)\" />\n`;
+      //   out += '<g stroke="black">\n';
+      //   let y_ = temp_data[0];
+      //   let x_ = 0;
+      //   let plotted_points = 0;
+      //   for (let x = 0; x < temp_points_array.length - 1; x++) {
+      //     let y2 = temp_data[x];
+      //     if (y2 == PLACEHOLDER_POINT) {
+      //       continue;
+      //     }
+      //     plot_data = `<line x1=${x_ * x_scale} y1=${100 - y_ * y_scale} x2=${
+      //       plotted_points * x_scale
+      //     } y2=${100 - y2 * y_scale} stroke-width=\"1\" />\n`;
+      //     out += plot_data;
+      //     y_ = y2;
+      //     x_ = plotted_points;
+      //     plotted_points++;
+      //   }
+      //   out += "</g>\n</svg>\n";
 
-        if (
-          (!temp_axis_set && type == "temp") ||
-          (!humidity_axis_set && type == "humidity")
-        ) {
-          setXAxis(x_scale, type, plotted_points);
-        }
+      //   if (
+      //     (!temp_axis_set && type == "temp") ||
+      //     (!humidity_axis_set && type == "humidity")
+      //   ) {
+      //     setXAxis(x_scale, type, plotted_points);
+      //   }
 
-        if (total_point_count >= x_axis_range - 2) {
-          // was plotted_points
-          manageAxis(type, total_point_count);
-        }
+      //   if (total_point_count >= x_axis_range - 2) {
+      //     // was plotted_points
+      //     manageAxis(type, total_point_count);
+      //   }
 
-        return out;
-      }
+      //   return out;
+      // }
 
       var chartT = new Highcharts.Chart({
         chart: {
@@ -812,8 +814,6 @@
         },
       });
 
-      const minutes = 1; //use how often new points are added in backend
-      const milliseconds = minutes * 60 * 1000;
       function plotTemperatureOrHumidity(
         temp_points_array,
         type,
