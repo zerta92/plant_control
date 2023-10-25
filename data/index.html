@@ -220,7 +220,6 @@
 
     <script>
       let start_date = new Date();
-      let raw_start_date;
       let pump_status = "0";
       let x_axis_range = 100;
       let temp_axis_set = false;
@@ -383,7 +382,7 @@
           xhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
               const raw_date = this.responseText;
-              raw_start_date = raw_date;
+
               const [raw_year, raw_days, raw_day] = raw_date
                 .split("T")[0]
                 .split("-");
@@ -685,37 +684,26 @@
         total_point_count
       ) {
         const temp_data = temp_points_array
-          .filter((p) => p !== PLACEHOLDER_POINT)
+          .filter((p) => p != PLACEHOLDER_POINT)
           .reverse();
-        const start_time =
-          start_date.getTime() + milliseconds * total_point_count;
 
-        let current_time = 0;
+        const start_time =
+          total_point_count > 100
+            ? start_date.getTime() + milliseconds * total_point_count
+            : start_date.getTime();
+
         for (var i = 0; i < temp_data.length; i++) {
           const temp = Number(temp_data[i]);
-          if (temp == PLACEHOLDER_POINT) {
-            continue;
-          }
-          current_time = start_time + milliseconds * i;
-          console.log({
-            start_time,
-            start_date,
-            current_time,
-            total_point_count,
-          });
+
+          const time = start_time + milliseconds * i;
+
           const series = type === "temp" ? 0 : 1;
 
-          chartT.series[series].addPoint(
-            [current_time, temp],
-            true,
-            false,
-            true
-          );
+          chartT.series[series].addPoint([time, temp], true, false, true);
         }
       }
 
       /* Deprecated */
-
       // const handleTime = (data) => {
       //   let hrs = data.getHours();
       //   let mins = data.getMinutes();
@@ -724,6 +712,7 @@
       //   const postTime = hrs + ":" + mins;
       //   return postTime;
       // };
+
       // function setXAxis(x_scale, type, plotted_points) {
       //   const x_axis = Array.from(Array(x_axis_range + 1).keys());
       //   const x_axis_dates = x_axis.map((x) => {
