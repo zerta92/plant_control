@@ -67,3 +67,8 @@ void printLocalTime()
     }
     Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 }
+
+void resetNoWaterDetected(bool &no_water_detected)
+{
+    no_water_detected = false;
+}

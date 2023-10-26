@@ -14,5 +14,6 @@ float getTemperature();
 void drawGraph(AsyncWebServerRequest *request, int temp_data[100]);
 String getStartTime();
 void printLocalTime();
+void resetNoWaterDetected(bool &no_water_detected);
 
 #endif

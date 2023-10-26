@@ -33,10 +33,6 @@
 
       /* Styles for centering and stacking buttons on small screens */
       @media screen and (max-width: 600px) {
-        div {
-          text-align: center;
-        }
-
         .button {
           width: 100%;
         }
@@ -107,78 +103,115 @@
       </div>
     </div>
     <hr />
-    <div style="text-align: center">
-      <h3>Stats</h3>
-      <div style="display: inline-block">
-        Server Start Time :
-        <span id="start-time" style="color: rgb(255, 208, 0)">0</span>
-      </div>
-      <br />
-      <div style="display: inline-block">
-        Temperature:
-        <span id="temperature" style="color: rgb(255, 208, 0)">0</span>
-      </div>
-      <br />
-      <div style="display: inline-block">
-        Soil Humidity:
-        <span id="humidity-label" style="color: rgb(255, 208, 0)">0</span>
-      </div>
-      <br />
-      <div style="display: inline-block">
-        Measured at :
-        <span id="last_measured" style="color: rgb(255, 208, 0)">""</span>
-      </div>
-      <br />
-      <div style="display: inline-block">
-        Pump State :
-        <span id="pump-status-label" style="color: rgb(255, 208, 0)">0</span>
-      </div>
-      <br />
-      <div style="display: inline-block">
-        Light State :
-        <span id="light-status-label" style="color: rgb(255, 208, 0)">0</span>
-      </div>
-      <br />
-      <div style="display: inline-block">
-        Points Logged :
-        <span id="points-logged" style="color: rgb(255, 208, 0)">0</span>
-      </div>
-      <br />
-      <div style="display: inline-block">
-        Humidity Setpoint :
-        <input
-          id="humidity-setpoint"
-          type="number"
-          style="color: rgb(255, 208, 0); width: 50px"
-        />
-        <input
-          id="pump-toggle-button"
-          style="background-color: #4bb5ea; height: 20px"
-          onclick="setHumiditySetpoint()"
-          type="button"
-          value="set"
-        />
-      </div>
-      <br />
-      <div style="display: inline-block">
-        Automatic Mode :
-        <span id="auto-status-label" style="color: rgb(255, 208, 0)">0</span>
-      </div>
-      <br />
-      <div style="display: inline-block">
-        Humidity Notifications Reset :
-        <span
-          id="humidity-text-notifications-label"
-          style="color: rgb(255, 208, 0)"
-          >0</span
-        >
-      </div>
-      <br />
-      <div style="display: inline-block">
-        Temp Notifications Reset :
-        <span id="temp-text-notifications-label" style="color: rgb(255, 208, 0)"
-          >0</span
-        >
+    <div style="display: flex; justify-content: center">
+      <div style="text-align: left">
+        <h3 style="text-align: center">Stats</h3>
+        <div style="display: inline-block; width: 100%">
+          Server Start Time :
+          <span id="start-time" style="color: rgb(255, 208, 0); float: right"
+            >0</span
+          >
+        </div>
+        <br />
+        <div style="display: inline-block; width: 100%">
+          Temperature:
+          <span id="temperature" style="color: rgb(255, 208, 0); float: right"
+            >0</span
+          >
+        </div>
+        <br />
+        <div style="display: inline-block; width: 100%">
+          Soil Humidity:
+          <span
+            id="humidity-label"
+            style="color: rgb(255, 208, 0); float: right"
+            >0</span
+          >
+        </div>
+        <br />
+        <div style="display: inline-block; width: 100%">
+          Measured at :
+          <span id="last_measured" style="color: rgb(255, 208, 0); float: right"
+            >""</span
+          >
+        </div>
+        <br />
+        <div style="display: inline-block; width: 100%">
+          Pump State :
+          <span
+            id="pump-status-label"
+            style="color: rgb(255, 208, 0); float: right"
+            >0</span
+          >
+        </div>
+        <br />
+        <div style="display: inline-block; width: 100%">
+          No Water Detected Flag :
+          <span
+            id="no-water-detected-status-label"
+            style="color: rgb(255, 208, 0); float: right"
+            >0</span
+          >
+        </div>
+        <br />
+        <div style="display: inline-block; width: 100%">
+          Light State :
+          <span
+            id="light-status-label"
+            style="color: rgb(255, 208, 0); float: right"
+            >0</span
+          >
+        </div>
+        <br />
+        <div style="display: inline-block; width: 100%">
+          Points Logged :
+          <span id="points-logged" style="color: rgb(255, 208, 0); float: right"
+            >0</span
+          >
+        </div>
+        <br />
+        <div style="display: inline-block; width: 100%">
+          Humidity Setpoint :
+          <input
+            id="pump-toggle-button"
+            style="background-color: #4bb5ea; height: 20px; float: right"
+            onclick="setHumiditySetpoint()"
+            type="button"
+            value="set"
+          />
+          <input
+            id="humidity-setpoint"
+            type="number"
+            style="color: rgb(255, 208, 0); width: 50px; float: right"
+          />
+        </div>
+        <br />
+        <div style="display: inline-block; width: 100%">
+          Automatic Mode :
+          <span
+            id="auto-status-label"
+            style="color: rgb(255, 208, 0); float: right"
+            >0</span
+          >
+        </div>
+        <br />
+        <div style="display: inline-block; width: 100%">
+          Humidity Notifications Reset :
+          <span
+            id="humidity-text-notifications-label"
+            style="color: rgb(255, 208, 0); float: right"
+            >0</span
+          >
+        </div>
+        <br />
+        <div style="display: inline-block; width: 100%">
+          Temp Notifications Reset :
+          <span
+            id="temp-text-notifications-label"
+            style="color: rgb(255, 208, 0); float: right"
+            >0</span
+          >
+        </div>
       </div>
     </div>
     <hr />
@@ -216,11 +249,20 @@
         class="button"
         value="Reset Notifications"
       />
+      <input
+        id="pump-toggle-button"
+        style="background-color: #ec118d"
+        onclick="resetNoWaterDetectedFlag()"
+        type="button"
+        class="button"
+        value="Reset No Water Flag"
+      />
     </div>
 
     <script>
       let start_date = new Date();
       let pump_status = "0";
+      let no_water_detected_status = false;
       let x_axis_range = 100;
       let temp_axis_set = false;
       let humidity_axis_set = false;
@@ -234,6 +276,7 @@
       window.onload = async function () {
         await getStartTime();
         getPumpStatus();
+        getNoWaterDetectedStatus();
         getLightStatus();
         getAutoStatus();
         getNotificationsStatus();
@@ -329,6 +372,19 @@
         xhttp.send();
       }
 
+      function resetNoWaterDetectedFlag() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            document.getElementById(
+              "no-water-detected-status-label"
+            ).innerHTML = +this.responseText;
+          }
+        };
+        xhttp.open("GET", "/reset_no_water_detected", true);
+        xhttp.send();
+      }
+
       function toggleStatus(status) {
         if (status === "0") {
           return "1";
@@ -411,7 +467,9 @@
                 `${year}-${month}-${day}T${hour}:${minutes}:${seconds}`
               );
 
-              document.getElementById("start-time").innerHTML = start_date;
+              document.getElementById("start-time").innerHTML = start_date
+                .toString()
+                .split(" GMT")[0];
               resolve();
             }
           };
@@ -430,6 +488,21 @@
           }
         };
         xhttp.open("GET", "/get_pump_status", true);
+        xhttp.send();
+      }
+
+      function getNoWaterDetectedStatus() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            document.getElementById(
+              "no-water-detected-status-label"
+            ).innerHTML = this.responseText;
+            no_water_detected_status = this.responseText;
+          }
+        };
+
+        xhttp.open("GET", "/get_no_water_detected_status", true);
         xhttp.send();
       }
 
@@ -520,6 +593,7 @@
           getPumpStatus();
           getLightStatus();
           getNotificationsStatus();
+          getNoWaterDetectedStatus();
         }, 29000);
 
         setInterval(function () {
@@ -689,7 +763,9 @@
 
         const start_time =
           total_point_count > 100
-            ? start_date.getTime() + milliseconds * total_point_count
+            ? start_date.getTime() +
+              milliseconds * total_point_count -
+              milliseconds * 100
             : start_date.getTime();
 
         for (var i = 0; i < temp_data.length; i++) {
@@ -700,6 +776,11 @@
           const series = type === "temp" ? 0 : 1;
 
           chartT.series[series].addPoint([time, temp], true, false, true);
+
+          // Check if the series data length exceeds 100, and remove the oldest point
+          if (chartT.series[series].length > 100) {
+            chartT.series[series][0].remove();
+          }
         }
       }
 

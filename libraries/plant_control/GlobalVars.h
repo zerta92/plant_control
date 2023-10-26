@@ -19,6 +19,7 @@ extern int humidity_setpoint_global;
 extern bool is_pulse_water;
 extern int points_read_from_start;
 extern float humidity_percent_prev;
+extern bool no_water_detected;
 
 // System Time NTP
 extern const char *ntpServer;

@@ -65,7 +65,7 @@ void setup()
   Serial.println("Connecting WIFI...");
   connectWifi();
   Serial.println("starting server...");
-  setupServer(humiditySensor, humidityRelay, tempRelay, points_read_from_start, temperature, humidity_percent, humidity_setpoint_global, auto_mode, temp_nofo_flag, humidity_nofo_flag, is_pulse_water);
+  setupServer(humiditySensor, humidityRelay, tempRelay, points_read_from_start, temperature, humidity_percent, humidity_setpoint_global, auto_mode, temp_nofo_flag, humidity_nofo_flag, is_pulse_water, no_water_detected);
   populateDataArrays();
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
   printLocalTime();
@@ -77,7 +77,7 @@ void setup()
 int minute_counter = 0;
 void loop(void)
 {
-  // Handle OTA Updates
+  // Handle OTA Updatesa
   // ArduinoOTA.handle();
   unsigned long currentMillis = millis();
   if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >= interval))
@@ -89,6 +89,7 @@ void loop(void)
 
   if ((currentMillis - lastTime) > timerDelay)
   {
+    Serial.println(no_water_detected);
     lastTime = millis();
     temperature = getTemperature();
     humidity_percent = getHumidity(humiditySensor);
@@ -116,8 +117,10 @@ void loop(void)
 
 void autoControl(float humidity_percent, float temperature)
 {
-  // If humidity is not changing even though we have been watering then dont water any more. reset humidity_percent_prev with onTogglePumpChange()
-  if (humidity_percent < humidity_setpoint_global && (humidity_percent > humidity_percent_prev))
+
+  /* Pump Control */
+  // If humidity is not changing even though we have been watering then dont water any more.
+  if (humidity_percent < humidity_setpoint_global && (!no_water_detected))
   {
     humidity_percent_prev = humidity_percent;
     pulseWater();
@@ -134,6 +137,12 @@ void autoControl(float humidity_percent, float temperature)
     digitalWrite(humidityRelay, LOW);
   }
 
+  if (humidity_percent < humidity_setpoint_global && !(humidity_percent > humidity_percent_prev) && !no_water_detected)
+  {
+    no_water_detected = true;
+  }
+
+  /* Temperature Control */
   if (temperature < TEMPERATURE_SETPOINT)
   {
     digitalWrite(tempRelay, HIGH);

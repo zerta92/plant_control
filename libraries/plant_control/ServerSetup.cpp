@@ -5,7 +5,7 @@
 
 String webString = "";
 
-void setupServer(int humiditySensor, int humidityRelay, int tempRelay, int &points_read_from_start, float &temperature, float &humidity_percent, int &humidity_setpoint_global, int &auto_mode, bool &temp_nofo_flag, bool &humidity_nofo_flag, bool &is_pulse_water)
+void setupServer(int humiditySensor, int humidityRelay, int tempRelay, int &points_read_from_start, float &temperature, float &humidity_percent, int &humidity_setpoint_global, int &auto_mode, bool &temp_nofo_flag, bool &humidity_nofo_flag, bool &is_pulse_water, bool &no_water_detected)
 {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             {
@@ -144,6 +144,14 @@ void setupServer(int humiditySensor, int humidityRelay, int tempRelay, int &poin
             {
               auto_mode = !auto_mode;
               request->send(200, "text/plain", String(auto_mode).c_str()); });
+
+  server.on("/reset_no_water_detected", HTTP_GET, [&no_water_detected](AsyncWebServerRequest *request)
+            {
+              resetNoWaterDetected(no_water_detected);
+              request->send(200, "text/plain", String(false).c_str()); });
+
+  server.on("/get_no_water_detected_status", HTTP_GET, [&no_water_detected](AsyncWebServerRequest *request)
+            { request->send(200, "text/plain", String(no_water_detected).c_str()); });
 
   server.on("/reset_flags", HTTP_GET, [&temp_nofo_flag, &humidity_nofo_flag](AsyncWebServerRequest *request)
             {
