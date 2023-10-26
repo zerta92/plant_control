@@ -89,7 +89,6 @@ void loop(void)
 
   if ((currentMillis - lastTime) > timerDelay)
   {
-    Serial.println(no_water_detected);
     lastTime = millis();
     temperature = getTemperature();
     humidity_percent = getHumidity(humiditySensor);
@@ -127,8 +126,8 @@ void autoControl(float humidity_percent, float temperature)
     if (humidity_nofo_flag == false)
     {
 
-      String message = "Humidity below " + String(humidity_setpoint_global);
-      bot.sendMessage(CHAT_ID, "Humidity Below ", "");
+      String message = "Humidity at " + String(humidity_percent) + "%";
+      bot.sendMessage(CHAT_ID, message);
       humidity_nofo_flag = true;
     }
   }
@@ -140,6 +139,8 @@ void autoControl(float humidity_percent, float temperature)
   if (humidity_percent < humidity_setpoint_global && !(humidity_percent > humidity_percent_prev) && !no_water_detected)
   {
     no_water_detected = true;
+    String message = "No water detected!";
+    bot.sendMessage(CHAT_ID, message);
   }
 
   /* Temperature Control */
@@ -148,7 +149,8 @@ void autoControl(float humidity_percent, float temperature)
     digitalWrite(tempRelay, HIGH);
     if (temp_nofo_flag == false)
     {
-      bot.sendMessage(CHAT_ID, "Temperature Below 21C", "");
+      String message = "Temperature at " + String(temperature) + "C";
+      bot.sendMessage(CHAT_ID, message);
       temp_nofo_flag = true;
     }
   }
