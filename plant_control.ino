@@ -16,7 +16,7 @@
 #include <DallasTemperature.h>
 
 // Custom Files
-// #include "handleOTA.h"
+#include "handleOTA.h"
 #include "secrets.h"
 #include "GlobalVars.h"
 #include "ServerSetup.h"
@@ -33,8 +33,8 @@ const char *ssid = SECRET_SSID;
 const char *password = SECRET_SPASSWORD;
 AsyncWebServer server(80);
 
-int temp_data[100];
-int humidity_data[100];
+String temp_data[100];
+String humidity_data[100];
 
 // Temp Analog Reading
 #define ONE_WIRE_BUS 0
@@ -52,6 +52,8 @@ unsigned long interval = 60000;
 int TEMPERATURE_SETPOINT = 21;
 int *data_points_pointer;
 char data_points_placeholder[200] = {'\0'};
+
+StaticJsonDocument<200> jsonDocument;
 
 void setup()
 {
@@ -78,7 +80,7 @@ int minute_counter = 0;
 void loop(void)
 {
   // Handle OTA Updatesa
-  // ArduinoOTA.handle();
+   ArduinoOTA.handle();
   unsigned long currentMillis = millis();
   if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >= interval))
   {
@@ -106,7 +108,6 @@ void loop(void)
   if (currentMillis - lastTimeLogToSpiffs >= interval)
   {
     lastTimeLogToSpiffs = millis();
-    // previousMillis = currentMillis;
     addValueToHumidityData(humidity_percent);
     addValueToTempData(temperature);
   }
@@ -217,9 +218,9 @@ void setupSPIFFS()
 void pulseWater()
 {
   digitalWrite(humidityRelay, HIGH);
-  delay(800);
+  delay(2200);
   digitalWrite(humidityRelay, LOW);
-  delay(300);
+  delay(800);
 }
 
 int addValueToTempData(float number)
@@ -228,7 +229,8 @@ int addValueToTempData(float number)
   {
     temp_data[i] = temp_data[i - 1];
   }
-  temp_data[0] = number;
+
+  temp_data[0] = createJSON(number, millis());
   points_read_from_start++;
   writeDataToSPIFFS("temp");
   writeDataToSPIFFS("points_count");
@@ -240,17 +242,32 @@ int addValueToHumidityData(float number)
 
   for (int i = 99; i >= 1; i--)
   {
+
     humidity_data[i] = humidity_data[i - 1];
   }
-  humidity_data[0] = number;
+
+  humidity_data[0] = createJSON(number, millis());
   writeDataToSPIFFS("humidity");
+
   return number;
+}
+
+String createJSON(int value, long time)
+{
+  jsonDocument["time"] = time;
+  jsonDocument["value"] = value;
+
+  // Serialize JSON to a string
+  String jsonString;
+  serializeJson(jsonDocument, jsonString);
+
+  return jsonString;
 }
 
 void setupSavedData(String type)
 {
 
-  int *data_to_save;
+  String *data_to_save;
   File file;
   if (type == "humidity")
   {
@@ -311,7 +328,7 @@ void setupSavedData(String type)
 
 void writeDataToSPIFFS(String type)
 {
-  int *data_to_save;
+  String *data_to_save;
   File file;
   if (type == "humidity")
   {
@@ -351,7 +368,7 @@ void writeDataToSPIFFS(String type)
   String plot_data = "";
   for (int x = 0; x < 99; x++)
   {
-    int point = data_to_save[x];
+    String point = data_to_save[x];
     plot_data = String(point) + String("|");
     string_data += plot_data;
   }
@@ -444,7 +461,7 @@ void populateDataArrays()
 {
   for (uint8_t i = 0; i < 99; i++)
   {
-    temp_data[i] = 666;
-    humidity_data[i] = 666;
+    temp_data[i] = createJSON(666, millis());
+    humidity_data[i] = createJSON(666, millis());
   }
 }

@@ -763,20 +763,13 @@
         total_point_count
       ) {
         const temp_data = temp_points_array
-          .filter((p) => p != PLACEHOLDER_POINT)
+          .filter((p) => JSON.parse(p).value != PLACEHOLDER_POINT)
           .reverse();
 
-        const start_time =
-          total_point_count > 100
-            ? start_date.getTime() +
-              milliseconds * total_point_count -
-              milliseconds * 100
-            : start_date.getTime();
-
         for (var i = 0; i < temp_data.length; i++) {
-          const temp = Number(temp_data[i]);
-
-          const time = start_time + milliseconds * i;
+          const metric = JSON.parse(temp_data[i]);
+          const temp = Number(metric.value);
+          const time = start_date.getTime() + Number(metric.time);
 
           const series = type === "temp" ? 0 : 1;
 
