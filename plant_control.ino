@@ -47,24 +47,25 @@ unsigned long lastTimeLogToSpiffs = 0;
 void printDirectory(File dir, int numTabs = 3);
 
 unsigned long previousMillis = 0;
-unsigned long interval = 60000;
+unsigned long pointLogInterval = 600000; // 10 minutes
 
 int TEMPERATURE_SETPOINT = 21;
 int *data_points_pointer;
 char data_points_placeholder[200] = {'\0'};
 
+int no_humidity_increase_after_watering = 0;
+
 StaticJsonDocument<200> jsonDocument;
 
 void setup()
 {
-  Serial.println("starting up...");
   Serial.begin(115200);
   pinMode(humidityRelay, OUTPUT);
   pinMode(tempRelay, OUTPUT);
   sensors.begin();
   Serial.println("starting SPIFFS...");
   setupSPIFFS();
-  Serial.println("Connecting WIFI...");
+  Serial.println("Connecting Wifi...");
   connectWifi();
   Serial.println("starting server...");
   setupServer(humiditySensor, humidityRelay, tempRelay, points_read_from_start, temperature, humidity_percent, humidity_setpoint_global, auto_mode, temp_nofo_flag, humidity_nofo_flag, is_pulse_water, no_water_detected);
@@ -79,10 +80,9 @@ void setup()
 int minute_counter = 0;
 void loop(void)
 {
-  // Handle OTA Updatesa
-   ArduinoOTA.handle();
+  ArduinoOTA.handle();
   unsigned long currentMillis = millis();
-  if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >= interval))
+  if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >= timerDelay))
   {
     WiFi.disconnect();
     WiFi.reconnect();
@@ -105,7 +105,7 @@ void loop(void)
     };
   }
 
-  if (currentMillis - lastTimeLogToSpiffs >= interval)
+  if (currentMillis - lastTimeLogToSpiffs >= pointLogInterval)
   {
     lastTimeLogToSpiffs = millis();
     addValueToHumidityData(humidity_percent);
@@ -119,7 +119,6 @@ void autoControl(float humidity_percent, float temperature)
 {
 
   /* Pump Control */
-  // If humidity is not changing even though we have been watering then dont water any more.
   if (humidity_percent < humidity_setpoint_global && (!no_water_detected))
   {
     humidity_percent_prev = humidity_percent;
@@ -137,11 +136,17 @@ void autoControl(float humidity_percent, float temperature)
     digitalWrite(humidityRelay, LOW);
   }
 
+  // If humidity is not changing for 2 pulses even though we have been watering then dont water any more.
   if (humidity_percent < humidity_setpoint_global && !(humidity_percent > humidity_percent_prev) && !no_water_detected)
   {
-    no_water_detected = true;
-    String message = "No water detected!";
-    bot.sendMessage(CHAT_ID, message);
+    no_humidity_increase_after_watering++;
+    if (no_humidity_increase_after_watering == 2)
+    {
+      no_water_detected = true;
+      String message = "No water detected!";
+      bot.sendMessage(CHAT_ID, message);
+      no_humidity_increase_after_watering = 0;
+    }
   }
 
   /* Temperature Control */
