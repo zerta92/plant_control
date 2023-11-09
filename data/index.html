@@ -220,7 +220,7 @@
       </div>
     </div>
     <hr />
-    <div style="text-align: center">
+    <div style="text-align: center; padding-bottom: 20px">
       <h3>Controls</h3>
       <input
         id="pump-toggle-button"
@@ -684,8 +684,8 @@
           xhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
               read_point_count = parseInt(this.responseText);
-              document.getElementById("points-logged").innerHTML =
-                read_point_count;
+              // document.getElementById("points-logged").innerHTML =
+              //   read_point_count;
               resolve(read_point_count);
             }
           };
