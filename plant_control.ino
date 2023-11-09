@@ -47,7 +47,7 @@ unsigned long lastTimeLogToSpiffs = 0;
 void printDirectory(File dir, int numTabs = 3);
 
 unsigned long previousMillis = 0;
-unsigned long pointLogInterval = 600000; // 10 minutes
+unsigned long pointLogInterval = 60000; // 10 minutes
 
 int TEMPERATURE_SETPOINT = 21;
 int *data_points_pointer;
