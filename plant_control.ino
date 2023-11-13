@@ -161,10 +161,11 @@ void autoControl(float humidity_percent, float temperature)
     digitalWrite(humidityRelay, LOW);
   }
 
-  // If humidity is not changing for 2 pulses even though we have been watering then dont water any more.
-  if (humidity_percent < humidity_setpoint_global && !(humidity_percent > humidity_percent_prev) && !no_water_detected)
+  float new_humidity = getHumidity(humiditySensor);
+  // If humidity is not changing for 2 pulses even though we have been watering then dont water any more. todo: get proper reading here of current himidity
+  if (new_humidity < humidity_setpoint_global && !(new_humidity > humidity_percent_prev) && !no_water_detected)
   {
-    no_humidity_increase_after_watering++;
+    no_humidity_increase_after_watering = no_humidity_increase_after_watering + 1;
     if (no_humidity_increase_after_watering == 2)
     {
       no_water_detected = true;
