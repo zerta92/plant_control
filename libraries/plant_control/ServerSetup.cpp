@@ -11,15 +11,16 @@ void setupServer(int humiditySensor, int humidityRelay, int tempRelay, int &poin
             {
     AsyncWebServerResponse *response = request->beginResponse(SPIFFS, "/index.html", "text/html");
 
-    File file = SPIFFS.open("/index.html");
-    if (!file)
-    {
-      Serial.println("Failed to open index.html");
-      return;
-    }
-    const auto filesize = file.size();
-    file.close();
-    response->addHeader("Content-Length", String(filesize, DEC));
+    // File file = SPIFFS.open("/index.html");
+    // if (!file)
+    // {
+    //   Serial.println("Failed to open index.html");
+    //   return;
+    // }
+    // const auto filesize = file.size();
+    // file.close();
+    // response->addHeader("Content-Length", String(filesize, DEC));
+    response->addHeader("Connection", "close");
     request->send(response); });
 
   // To Download a file
@@ -32,15 +33,16 @@ void setupServer(int humiditySensor, int humidityRelay, int tempRelay, int &poin
   server.on("/logo.svg", HTTP_GET, [](AsyncWebServerRequest *request)
             {
               AsyncWebServerResponse *response = request->beginResponse(SPIFFS, "/logo.svg", "image/svg+xml");
-              File file = SPIFFS.open("/logo.svg");
-              if (!file)
-              {
-                Serial.println("Failed to open logo.svg");
-                return;
-              }
-              const auto filesize = file.size();
-              response->addHeader("Content-Length", String(filesize, DEC));
-              file.close();
+              // File file = SPIFFS.open("/logo.svg");
+              // if (!file)
+              // {
+              //   Serial.println("Failed to open logo.svg");
+              //   return;
+              // }
+              // const auto filesize = file.size();
+              // response->addHeader("Content-Length", String(filesize, DEC));
+              // file.close();
+              response->addHeader("Connection", "close");
               request->send(response); });
 
   // server.on("/temp.svg", HTTP_GET, [](AsyncWebServerRequest *request)

@@ -93,10 +93,12 @@ void setup()
             else if (error == OTA_END_ERROR) Serial.println("End Failed"); });
 
   ArduinoOTA.begin();
+
   setupServer(humiditySensor, humidityRelay, tempRelay, points_read_from_start, temperature, humidity_percent, humidity_setpoint_global, auto_mode, temp_nofo_flag, humidity_nofo_flag, is_pulse_water, no_water_detected);
   populateDataArrays();
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
   printLocalTime();
+  setupSavedData("humidity_setpoint");
   //  setupSavedData("temp");
   //  setupSavedData("humidity");
   //  setupSavedData("point_count");
@@ -106,19 +108,21 @@ int minute_counter = 0;
 void loop(void)
 {
   ArduinoOTA.handle();
+
   unsigned long currentMillis = millis();
-  if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >= timerDelay))
+  // Handle disconnects
+  if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >= timerDelay * 10))
   {
-    WiFi.disconnect();
-    WiFi.reconnect();
+    connectWifi();
     previousMillis = currentMillis;
   }
 
   if ((currentMillis - lastTime) > timerDelay)
   {
-    lastTime = millis();
+
     temperature = getTemperature();
     humidity_percent = getHumidity(humiditySensor);
+    writeDataToSPIFFS("humidity_setpoint");
 
     if (auto_mode)
     {
@@ -128,6 +132,7 @@ void loop(void)
     {
       pulseWater();
     };
+    lastTime = millis();
   }
 
   if (currentMillis - lastTimeLogToSpiffs >= pointLogInterval)
@@ -194,9 +199,11 @@ void autoControl(float humidity_percent, float temperature)
 
 void connectWifi()
 {
+
+  WiFi.setSleep(false);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  WiFi.setSleep(false);
+
   client.setCACert(TELEGRAM_CERTIFICATE_ROOT);
   int x = 0;
   while (WiFi.status() != WL_CONNECTED)
@@ -265,7 +272,7 @@ int addValueToTempData(float number)
   temp_data[0] = createJSON(number, millis());
   points_read_from_start++;
   writeDataToSPIFFS("temp");
-  writeDataToSPIFFS("points_count");
+  // writeDataToSPIFFS("point_count");
   return number;
 }
 
@@ -305,57 +312,102 @@ void setupSavedData(String type)
   {
     data_to_save = humidity_data;
     file = SPIFFS.open("/humidity.txt", "r");
+
+    if (!file)
+    {
+      Serial.println("Failed to open file for reading");
+      return;
+    };
+
+    if (file.size() == 0)
+    {
+      Serial.println("data file empty");
+      return;
+    };
+
+    uint16_t i = 0;
+    while (file.available())
+    {
+      data_points_placeholder[i] = file.read();
+      i++;
+    }
+
+    file.close();
+
+    data_points_pointer = getValue(data_points_placeholder);
+
+    int y = 0;
+    for (int i = 0; i < 99; ++i)
+    {
+      data_to_save[i] = data_points_pointer[i];
+      y++;
+    }
+
+    // delete []sa// Clear pointer value from getValue function
   }
   else if (type == "temp")
   {
     data_to_save = temp_data;
     file = SPIFFS.open("/temp.txt", "r");
+
+    if (!file)
+    {
+      Serial.println("Failed to open file for reading");
+      return;
+    };
+
+    if (file.size() == 0)
+    {
+      Serial.println("data file empty");
+      return;
+    };
+
+    uint16_t i = 0;
+    while (file.available())
+    {
+      data_points_placeholder[i] = file.read();
+      i++;
+    }
+
+    file.close();
+
+    data_points_pointer = getValue(data_points_placeholder);
+
+    int y = 0;
+    for (int i = 0; i < 99; ++i)
+    {
+      data_to_save[i] = data_points_pointer[i];
+      y++;
+    }
+
+    // delete []sa// Clear pointer value from getValue function
   }
-  else
+  else if (type == "point_count")
   {
     file = SPIFFS.open("/point_count.txt", "r");
     if (file.size() == 0)
     {
-      Serial.println("data file empty");
+      Serial.println("point_count - data file empty");
       return;
     };
     float ssidString = file.parseFloat();
     points_read_from_start = static_cast<int>(ssidString);
     file.close();
     return;
-  };
-
-  if (!file)
+  }
+  else if (type == "humidity_setpoint")
   {
-    Serial.println("Failed to open file for reading");
+    file = SPIFFS.open("/point_count.txt", "r"); // testing instead of humidity_setpoint.txt
+    if (file.size() == 0)
+    {
+      Serial.println("humidity_setpoint - data file empty");
+      return;
+    };
+    float savedHumiditySetpoint = file.parseFloat();
+    humidity_setpoint_global = static_cast<int>(savedHumiditySetpoint);
+    file.close();
     return;
   };
-
-  if (file.size() == 0)
-  {
-    Serial.println("data file empty");
-    return;
-  };
-
-  uint16_t i = 0;
-  while (file.available())
-  {
-    data_points_placeholder[i] = file.read();
-    i++;
-  }
-
-  file.close();
-
-  data_points_pointer = getValue(data_points_placeholder);
-
-  int y = 0;
-  for (int i = 0; i < 99; ++i)
-  {
-    data_to_save[i] = data_points_pointer[i];
-    y++;
-  }
-
-  // delete []sa// Clear pointer value from getValue function
 }
 
 void writeDataToSPIFFS(String type)
@@ -371,6 +423,18 @@ void writeDataToSPIFFS(String type)
       Serial.println("Error opening file for writing");
       return;
     }
+
+    String string_data = "";
+    String plot_data = "";
+    for (int x = 0; x < 99; x++)
+    {
+      String point = data_to_save[x];
+      plot_data = String(point) + String("|");
+      string_data += plot_data;
+    }
+
+    int bytesWritten = file.print(string_data);
+    file.close();
   }
   else if (type == "temp")
   {
@@ -381,8 +445,20 @@ void writeDataToSPIFFS(String type)
       Serial.println("Error opening file for writing");
       return;
     }
+
+    String string_data = "";
+    String plot_data = "";
+    for (int x = 0; x < 99; x++)
+    {
+      String point = data_to_save[x];
+      plot_data = String(point) + String("|");
+      string_data += plot_data;
+    }
+
+    int bytesWritten = file.print(string_data);
+    file.close();
   }
-  else
+  else if (type == "point_count")
   {
     String point_count_string = String(points_read_from_start).c_str();
     file = SPIFFS.open("/point_count.txt", "w");
@@ -395,18 +471,19 @@ void writeDataToSPIFFS(String type)
     file.close();
     return;
   }
-
-  String string_data = "";
-  String plot_data = "";
-  for (int x = 0; x < 99; x++)
+  else if (type == "humidity_setpoint")
   {
-    String point = data_to_save[x];
-    plot_data = String(point) + String("|");
-    string_data += plot_data;
-  }
-
-  int bytesWritten = file.print(string_data);
-  file.close();
+    String new_humidity_setpoint = String(humidity_setpoint_global).c_str();
+    file = SPIFFS.open("/point_count.txt", "w");
+    if (!file)
+    {
+      Serial.println("humidity_setpoint - Error opening file for writing");
+      return;
+    }
+    int bytesWritten = file.print(new_humidity_setpoint);
+    file.close();
+    return;
+  };
 }
 
 int *getValue(String data_)
